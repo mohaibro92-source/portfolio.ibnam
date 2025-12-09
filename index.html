@@ -1,0 +1,1898 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ibrahim Muhammad — Windows 11 Portfolio (Enhanced)</title>
+  <style>
+    :root{
+      --accent:#0078d4;
+      --accent-hover:#106ebe;
+      --bg1:#202020;
+      --bg2:#2d2d2d;
+      --glass:rgba(255,255,255,0.08);
+      --glass-hover:rgba(255,255,255,0.12);
+      --muted:rgba(255,255,255,0.7);
+      --muted-light:rgba(255,255,255,0.9);
+      --radius:8px;
+      --radius-lg:12px;
+      font-family:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{
+      height:100%;
+      margin:0;
+      background:#000;
+      color:#ffffff;
+      overflow:hidden;
+      font-size:14px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale
+    }
+    #wallpaper{
+      position:fixed;
+      inset:0;
+      z-index:0;
+      background:#000;
+      background-size:cover;
+      background-position:center;
+      background-repeat:no-repeat;
+      transition:opacity 0.5s ease
+    }
+    #wallpaper::after{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%)
+    }
+
+    /* desktop */
+    #desktop{
+      position:relative;
+      z-index:1;
+      height:100vh;
+      padding:20px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:20px;
+      align-content:flex-start
+    }
+    .icon{
+      position:relative
+    }
+    .context-menu{
+      position:fixed;
+      background:rgba(32,32,32,0.95);
+      backdrop-filter:blur(20px);
+      border-radius:8px;
+      padding:4px;
+      min-width:200px;
+      z-index:10000;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+      border:1px solid rgba(255,255,255,0.1);
+      display:none;
+      max-height:80vh;
+      overflow-y:auto
+    }
+    .context-menu-item{
+      padding:8px 12px;
+      cursor:pointer;
+      border-radius:4px;
+      font-size:13px;
+      color:var(--muted-light);
+      transition:background-color 0.15s ease;
+      display:flex;
+      align-items:center;
+      gap:8px
+    }
+    .context-menu-item:hover{
+      background:rgba(255,255,255,0.1)
+    }
+    .context-menu-item.danger:hover{
+      background:#e81123;
+      color:#fff
+    }
+    .context-menu-item.has-submenu::after{
+      content:'›';
+      margin-left:auto;
+      font-size:16px;
+      opacity:0.7
+    }
+    .context-submenu{
+      position:absolute;
+      left:100%;
+      top:0;
+      margin-left:4px;
+      background:rgba(32,32,32,0.95);
+      backdrop-filter:blur(20px);
+      border-radius:8px;
+      padding:4px;
+      min-width:180px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+      border:1px solid rgba(255,255,255,0.1);
+      display:none
+    }
+    .context-submenu.show{
+      display:block
+    }
+    .wallpaper-preview{
+      width:24px;
+      height:16px;
+      border-radius:4px;
+      background-size:cover;
+      background-position:center;
+      border:1px solid rgba(255,255,255,0.2)
+    }
+    .icon{
+      width:86px;
+      text-align:center;
+      color:var(--muted-light);
+      cursor:pointer;
+      user-select:none;
+      padding:8px;
+      border-radius:var(--radius);
+      transition:background-color 0.2s ease;
+      position:absolute;
+      touch-action:none
+    }
+    .icon.dragging{
+      opacity:0.6;
+      z-index:10000;
+      cursor:grabbing
+    }
+    .icon:hover{
+      background:rgba(255,255,255,0.06)
+    }
+    .icon.drag-over{
+      background:rgba(0,120,212,0.2);
+      border:2px dashed var(--accent)
+    }
+    .icon .glyph{
+      font-size:40px;
+      display:block;
+      margin-bottom:6px;
+      transition:transform 0.2s ease,filter 0.2s ease
+    }
+    .icon:hover .glyph{
+      transform:scale(1.1);
+      filter:drop-shadow(0 4px 12px rgba(0,120,212,0.3))
+    }
+    .icon span{
+      font-size:12px;
+      display:block;
+      margin-top:4px;
+      text-shadow:0 1px 2px rgba(0,0,0,0.5)
+    }
+
+    /* Window opening animation overlay */
+    .window-opening{
+      position:fixed;
+      inset:0;
+      z-index:10000;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none
+    }
+    .window-opening-icon{
+      width:120px;
+      height:120px;
+      background:rgba(32,32,32,0.95);
+      border-radius:var(--radius-lg);
+      display:grid;
+      place-items:center;
+      font-size:64px;
+      backdrop-filter:blur(20px);
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+      animation:windowOpen 0.5s cubic-bezier(0.4,0,0.2,1) forwards
+    }
+    @keyframes windowOpen{
+      0%{
+        transform:scale(0.3) rotate(-10deg);
+        opacity:0
+      }
+      50%{
+        transform:scale(1.1) rotate(5deg);
+        opacity:1
+      }
+      100%{
+        transform:scale(1) rotate(0deg);
+        opacity:0
+      }
+    }
+
+    /* windows - Windows 11 style */
+    .window{
+      position:absolute;
+      background:rgba(32,32,32,0.85);
+      border-radius:var(--radius-lg);
+      backdrop-filter:blur(40px) saturate(180%);
+      -webkit-backdrop-filter:blur(40px) saturate(180%);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4),
+                 0 0 0 0.5px rgba(255,255,255,0.05) inset;
+      border:1px solid rgba(255,255,255,0.08);
+      overflow:hidden;
+      display:none;
+      min-width:320px;
+      min-height:200px;
+      transition:box-shadow 0.2s ease;
+      animation:windowAppear 0.3s cubic-bezier(0.4,0,0.2,1)
+    }
+    @keyframes windowAppear{
+      from{
+        opacity:0;
+        transform:scale(0.9) translateY(10px)
+      }
+      to{
+        opacity:1;
+        transform:scale(1) translateY(0)
+      }
+    }
+    .window:focus-within{
+      box-shadow:0 8px 32px rgba(0,0,0,0.5),
+                 0 0 0 0.5px rgba(255,255,255,0.1) inset
+    }
+    .title{
+      height:48px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:0 16px;
+      cursor:grab;
+      background:rgba(255,255,255,0.02);
+      border-bottom:1px solid rgba(255,255,255,0.05)
+    }
+    .title:active{
+      cursor:grabbing
+    }
+    .title .title-text{
+      font-weight:600;
+      font-size:13px;
+      color:var(--muted-light)
+    }
+    .controls{
+      margin-left:auto;
+      display:flex;
+      gap:0
+    }
+    .btn{
+      width:46px;
+      height:32px;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      font-size:12px;
+      color:var(--muted);
+      transition:background-color 0.15s ease,color 0.15s ease;
+      border-radius:0
+    }
+    .btn:hover{
+      background:rgba(255,255,255,0.1);
+      color:#fff
+    }
+    .btn[data-action="close"]:hover{
+      background:#e81123;
+      color:#fff
+    }
+    .btn:first-child{
+      border-top-left-radius:var(--radius-lg)
+    }
+    .content{
+      padding:20px;
+      color:var(--muted);
+      overflow:auto;
+      max-height:calc(100vh - 200px);
+      background:rgba(0,0,0,0.2)
+    }
+    .resizer{
+      position:absolute;
+      width:16px;
+      height:16px;
+      right:0;
+      bottom:0;
+      cursor:se-resize;
+      background:linear-gradient(135deg, transparent 0%, transparent 50%, rgba(255,255,255,0.1) 50%)
+    }
+
+    /* taskbar - Windows 11 centered style */
+    #taskbar{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:12px;
+      height:48px;
+      background:rgba(30,30,30,0.8);
+      border-radius:24px;
+      padding:0 8px;
+      display:flex;
+      align-items:center;
+      gap:4px;
+      z-index:1000;
+      backdrop-filter:blur(20px) saturate(180%);
+      -webkit-backdrop-filter:blur(20px) saturate(180%);
+      box-shadow:0 0 0 1px rgba(255,255,255,0.08) inset,
+                 0 8px 32px rgba(0,0,0,0.4);
+      border:1px solid rgba(255,255,255,0.06)
+    }
+    #taskbar-right{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin-left:auto;
+      padding-right:8px
+    }
+    .tray-icon{
+      width:36px;
+      height:36px;
+      border-radius:8px;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      font-size:14px;
+      transition:background-color 0.2s ease
+    }
+    .tray-icon:hover{
+      background:rgba(255,255,255,0.1)
+    }
+    #clock{
+      padding:0 12px;
+      font-size:12px;
+      color:var(--muted-light);
+      font-weight:500;
+      cursor:pointer;
+      border-radius:8px;
+      height:36px;
+      display:grid;
+      place-items:center;
+      transition:background-color 0.2s ease
+    }
+    #clock:hover{
+      background:rgba(255,255,255,0.1)
+    }
+    #taskbar .center{
+      display:flex;
+      gap:4px;
+      margin:0 auto;
+      align-items:center
+    }
+    .task-icon{
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      position:relative;
+      transition:background-color 0.2s ease,transform 0.2s ease;
+      font-size:20px
+    }
+    .task-icon:hover{
+      background:rgba(255,255,255,0.1);
+      transform:scale(1.05)
+    }
+    .task-icon.active{
+      background:rgba(255,255,255,0.12)
+    }
+    .task-icon.active::after{
+      content:'';
+      position:absolute;
+      bottom:4px;
+      left:50%;
+      transform:translateX(-50%);
+      width:20px;
+      height:3px;
+      background:var(--accent);
+      border-radius:2px
+    }
+    #startBtn{
+      font-size:18px;
+      font-weight:600;
+      color:var(--muted-light)
+    }
+
+    /* start menu - Windows 11 style */
+    #start{
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:72px;
+      width:640px;
+      max-width:90vw;
+      background:rgba(32,32,32,0.95);
+      border-radius:var(--radius-lg);
+      padding:12px;
+      backdrop-filter:blur(40px) saturate(180%);
+      -webkit-backdrop-filter:blur(40px) saturate(180%);
+      box-shadow:0 8px 32px rgba(0,0,0,0.5),
+                 0 0 0 1px rgba(255,255,255,0.08) inset;
+      display:none;
+      z-index:1001;
+      border:1px solid rgba(255,255,255,0.08);
+      animation:startMenuSlide 0.2s ease-out
+    }
+    @keyframes startMenuSlide{
+      from{
+        opacity:0;
+        transform:translateX(-50%) translateY(10px) scale(0.95)
+      }
+      to{
+        opacity:1;
+        transform:translateX(-50%) translateY(0) scale(1)
+      }
+    }
+    .pinned{
+      display:grid;
+      grid-template-columns:repeat(6,1fr);
+      gap:8px;
+      margin-top:12px
+    }
+    .pin{
+      padding:12px 8px;
+      border-radius:10px;
+      text-align:center;
+      cursor:pointer;
+      transition:background-color 0.2s ease,transform 0.2s ease
+    }
+    .pin:hover{
+      background:rgba(255,255,255,0.1);
+      transform:scale(1.05)
+    }
+    .pin .glyph{
+      font-size:32px;
+      margin-bottom:6px
+    }
+    .pin small{
+      display:block;
+      font-size:11px;
+      color:var(--muted);
+      margin-top:4px
+    }
+
+    /* boot & lock screens */
+    #bootScreen,#lockScreen,#loginScreen{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      z-index:9999;
+      background:#000
+    }
+    #bootScreen.hidden,#lockScreen.hidden,#loginScreen.hidden{
+      display:none !important
+    }
+    /* Boot screen should be visible by default */
+    #bootScreen{
+      display:flex !important
+    }
+    #loginScreen{
+      background:linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      background-size:cover;
+      background-position:center
+    }
+    #loginCard{
+      background:rgba(32,32,32,0.95);
+      padding:48px 56px;
+      border-radius:var(--radius-lg);
+      backdrop-filter:blur(40px);
+      border:1px solid rgba(255,255,255,0.1);
+      text-align:center;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5);
+      min-width:400px;
+      animation:loginSlideIn 0.4s ease-out
+    }
+    @keyframes loginSlideIn{
+      from{
+        opacity:0;
+        transform:translateY(20px) scale(0.95)
+      }
+      to{
+        opacity:1;
+        transform:translateY(0) scale(1)
+      }
+    }
+    #loginInput{
+      width:100%;
+      padding:12px 16px;
+      margin:20px 0;
+      border-radius:8px;
+      border:2px solid rgba(255,255,255,0.1);
+      background:rgba(255,255,255,0.05);
+      color:var(--muted-light);
+      font-size:15px;
+      outline:none;
+      transition:all 0.2s ease;
+      font-family:inherit
+    }
+    #loginInput:focus{
+      border-color:var(--accent);
+      background:rgba(255,255,255,0.08);
+      box-shadow:0 0 0 3px rgba(0,120,212,0.2)
+    }
+    #loginBtn{
+      width:100%;
+      padding:12px 24px;
+      border-radius:8px;
+      border:0;
+      background:var(--accent);
+      color:#fff;
+      cursor:pointer;
+      font-weight:600;
+      font-size:15px;
+      margin-top:8px;
+      transition:all 0.2s ease;
+      box-shadow:0 4px 12px rgba(0,120,212,0.3)
+    }
+    #loginBtn:hover{
+      background:var(--accent-hover);
+      transform:translateY(-1px);
+      box-shadow:0 6px 16px rgba(0,120,212,0.4)
+    }
+    #loginBtn:active{
+      transform:translateY(0)
+    }
+    #bootLogo{
+      font-size:28px;
+      font-weight:600;
+      color:var(--muted-light);
+      margin-bottom:32px;
+      letter-spacing:1px
+    }
+    #bootProgress{
+      width:320px;
+      height:4px;
+      background:rgba(255,255,255,0.1);
+      border-radius:2px;
+      overflow:hidden
+    }
+    #bootBar{
+      height:100%;
+      width:0;
+      background:linear-gradient(90deg,var(--accent),#00bcf2);
+      border-radius:2px;
+      transition:width 0.3s ease
+    }
+    #lockCard{
+      background:rgba(32,32,32,0.9);
+      padding:32px 40px;
+      border-radius:var(--radius-lg);
+      backdrop-filter:blur(40px);
+      border:1px solid rgba(255,255,255,0.1);
+      text-align:center;
+      box-shadow:0 8px 32px rgba(0,0,0,0.5)
+    }
+
+    /* snap overlay */
+    .snapMenu{
+      position:absolute;
+      top:56px;
+      right:12px;
+      background:rgba(32,32,32,0.95);
+      border-radius:10px;
+      padding:8px;
+      display:flex;
+      gap:6px;
+      z-index:20;
+      border:1px solid rgba(255,255,255,0.1);
+      backdrop-filter:blur(20px);
+      box-shadow:0 4px 16px rgba(0,0,0,0.4)
+    }
+    .snapBtn{
+      width:48px;
+      height:48px;
+      border-radius:8px;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      transition:background-color 0.2s ease
+    }
+    .snapBtn:hover{
+      background:rgba(255,255,255,0.1)
+    }
+
+    /* small responsiveness */
+    @media(max-width:720px){
+      #taskbar{
+        left:12px;
+        right:12px;
+        transform:none;
+        width:auto
+      }
+      #start{
+        width:calc(100% - 24px);
+        left:12px;
+        transform:none
+      }
+      .pinned{
+        grid-template-columns:repeat(4,1fr)
+      }
+    }
+
+    /* animations */
+    .fade-in{
+      animation:fade 0.2s ease-out
+    }
+    @keyframes fade{
+      from{
+        opacity:0;
+        transform:translateY(8px) scale(0.98)
+      }
+      to{
+        opacity:1;
+        transform:translateY(0) scale(1)
+      }
+    }
+
+    /* terminal look */
+    .terminal{
+      background:rgba(0,0,0,0.4);
+      color:#d4f4ff;
+      padding:16px;
+      border-radius:8px;
+      font-family:"Cascadia Code","Consolas","Monaco",monospace;
+      font-size:13px;
+      line-height:1.6
+    }
+
+    /* music player */
+    .player{
+      display:flex;
+      gap:12px;
+      align-items:center
+    }
+
+    /* Windows 11 scrollbar */
+    ::-webkit-scrollbar{
+      width:12px;
+      height:12px
+    }
+    ::-webkit-scrollbar-track{
+      background:rgba(0,0,0,0.2);
+      border-radius:6px
+    }
+    ::-webkit-scrollbar-thumb{
+      background:rgba(255,255,255,0.2);
+      border-radius:6px;
+      border:2px solid transparent;
+      background-clip:padding-box
+    }
+    ::-webkit-scrollbar-thumb:hover{
+      background:rgba(255,255,255,0.3);
+      background-clip:padding-box
+    }
+
+    /* Search input focus */
+    #search:focus-within{
+      background:rgba(255,255,255,0.08);
+      border-color:rgba(255,255,255,0.12)
+    }
+
+    /* Recommended items hover */
+    #start > div:last-child > div > div:hover{
+      background:rgba(255,255,255,0.08);
+      transform:scale(1.02);
+      border-color:rgba(255,255,255,0.1)
+    }
+
+    /* Button hover effects */
+    #unlockBtn:hover{
+      background:var(--accent-hover);
+      transform:scale(1.05)
+    }
+    #unlockBtn:active{
+      transform:scale(0.98)
+    }
+    #playTune{
+      transition:background-color 0.2s ease,transform 0.1s ease
+    }
+    #playTune:hover{
+      background:var(--accent-hover);
+      transform:scale(1.05)
+    }
+    #playTune:active{
+      transform:scale(0.98)
+    }
+
+    /* Wallpaper Switcher Animation */
+    #wallpaperSwitcher{
+      animation:slideInUp 0.3s ease-out
+    }
+    @keyframes slideInUp{
+      from{
+        opacity:0;
+        transform:translateY(20px)
+      }
+      to{
+        opacity:1;
+        transform:translateY(0)
+      }
+    }
+    #wallpaperSwitcher button:hover{
+      background:rgba(255,255,255,0.1)
+    }
+    #wallpaperSwitcherGrid{
+      scrollbar-width:thin;
+      scrollbar-color:rgba(255,255,255,0.2) transparent
+    }
+
+    /* Widgets panel */
+    #widgets{
+      position:fixed;
+      left:0;
+      top:0;
+      width:400px;
+      height:100vh;
+      background:rgba(32,32,32,0.95);
+      backdrop-filter:blur(40px);
+      border-right:1px solid rgba(255,255,255,0.08);
+      z-index:999;
+      transform:translateX(-100%);
+      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      overflow-y:auto;
+      padding:20px
+    }
+    #widgets.open{
+      transform:translateX(0)
+    }
+    .widget{
+      background:rgba(255,255,255,0.05);
+      border-radius:var(--radius-lg);
+      padding:16px;
+      margin-bottom:16px;
+      border:1px solid rgba(255,255,255,0.05)
+    }
+    .widget-title{
+      font-weight:600;
+      font-size:14px;
+      color:var(--muted-light);
+      margin-bottom:12px
+    }
+
+    /* Notification center */
+    #notifications{
+      position:fixed;
+      right:0;
+      top:0;
+      width:380px;
+      height:100vh;
+      background:rgba(32,32,32,0.95);
+      backdrop-filter:blur(40px);
+      border-left:1px solid rgba(255,255,255,0.08);
+      z-index:999;
+      transform:translateX(100%);
+      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      overflow-y:auto;
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:12px
+    }
+    #notifications.open{
+      transform:translateX(0)
+    }
+    .notification{
+      background:rgba(255,255,255,0.05);
+      border-radius:var(--radius-lg);
+      padding:14px;
+      border:1px solid rgba(255,255,255,0.05);
+      animation:slideInRight 0.3s ease-out
+    }
+    @keyframes slideInRight{
+      from{
+        opacity:0;
+        transform:translateX(20px)
+      }
+      to{
+        opacity:1;
+        transform:translateX(0)
+      }
+    }
+    .notification-title{
+      font-weight:600;
+      font-size:13px;
+      color:var(--muted-light);
+      margin-bottom:4px
+    }
+    .notification-text{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.4
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Wallpaper -->
+  <div id="wallpaper"></div>
+
+  <!-- Boot screen -->
+  <div id="bootScreen">
+    <div id="bootLogo">IbrahimOS</div>
+    <div id="bootProgress"><div id="bootBar" style="width:0%"></div></div>
+    <small style="color:var(--muted);margin-top:14px">Starting IbrahimOS…</small>
+  </div>
+
+  <!-- Login screen -->
+  <div id="loginScreen" class="hidden" style="display:none">
+    <div id="loginCard">
+      <div style="font-size:32px;font-weight:700;margin-bottom:8px;color:var(--muted-light)">Welcome</div>
+      <div style="color:var(--muted);margin-bottom:24px;font-size:14px">Sign in to your account</div>
+      <input type="text" id="loginInput" placeholder="Enter your name" autocomplete="off" maxlength="50">
+      <button id="loginBtn">Sign In</button>
+      <div style="color:var(--muted);font-size:12px;margin-top:16px;opacity:0.7">Any name will work</div>
+    </div>
+  </div>
+
+  <!-- Lock screen -->
+  <div id="lockScreen" class="hidden" style="display:none">
+    <div id="lockCard">
+      <div id="userNameDisplay" style="font-size:18px;font-weight:700"></div>
+      <div style="color:var(--muted);margin:8px 0">Full-Stack Developer • UI/UX Enthusiast</div>
+      <button id="unlockBtn" style="padding:10px 24px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:500;font-size:14px;margin-top:16px;transition:background-color 0.2s ease,transform 0.1s ease;box-shadow:0 2px 8px rgba(0,120,212,0.3)">Click to Enter</button>
+    </div>
+  </div>
+
+  <!-- Desktop icons -->
+  <div id="desktop">
+    <div class="icon" data-target="aboutWindow" data-icon="👤" tabindex="0" style="left:20px;top:20px">
+      <div class="glyph">👤</div>
+      <span>About</span>
+    </div>
+    <div class="icon" data-target="projectsWindow" data-icon="💻" tabindex="0" style="left:20px;top:120px">
+      <div class="glyph">💻</div>
+      <span>Projects</span>
+    </div>
+    <div class="icon" data-target="contactWindow" data-icon="📧" tabindex="0" style="left:20px;top:220px">
+      <div class="glyph">📧</div>
+      <span>Contact</span>
+    </div>
+    <div class="icon" data-target="notesWindow" data-icon="📝" tabindex="0" style="left:20px;top:320px">
+      <div class="glyph">📝</div>
+      <span>Notes</span>
+    </div>
+    <div class="icon" data-target="termWindow" data-icon="❯_" tabindex="0" style="left:20px;top:420px">
+      <div class="glyph">❯_</div>
+      <span>Terminal</span>
+    </div>
+    <div class="icon" data-target="musicWindow" data-icon="🎵" tabindex="0" style="left:20px;top:520px">
+      <div class="glyph">🎵</div>
+      <span>Music</span>
+    </div>
+    <div class="icon" data-target="settingsWindow" data-icon="⚙️" tabindex="0" style="left:20px;top:620px">
+      <div class="glyph">⚙️</div>
+      <span>Settings</span>
+    </div>
+    <div class="icon" data-target="teaserWindow" data-icon="🧠" tabindex="0" style="left:120px;top:20px">
+      <div class="glyph">🧠</div>
+      <span>Brain Teaser</span>
+    </div>
+  </div>
+
+  <!-- Puzzle Window for New Users -->
+  <div class="window" id="puzzleWindow" style="width:480px; display:none;">
+    <div class="title"><div class="title-text">Welcome Puzzle</div></div>
+    <div class="content" style="text-align:center; user-select:none;">
+      <h4 style="margin-top:0;color:var(--muted-light);font-weight:600">Complete the puzzle to sign in.</h4>
+      <div id="puzzleContainer" style="position:relative; width:300px; height:180px; margin:20px auto; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid rgba(255,255,255,0.1);">
+        <div style="position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); opacity:0.5; font-size:18px;">Drag the piece here</div>
+        <div id="puzzleSlot" style="position:absolute; left:120px; top:60px; width:60px; height:60px; background:rgba(0,0,0,0.4); border:2px dashed rgba(255,255,255,0.2);"></div>
+      </div>
+      <div id="puzzlePiece" style="position:absolute; left:40px; top:200px; width:60px; height:60px; background:var(--accent); border-radius:8px; cursor:grab; display:grid; place-items:center; font-size:24px; box-shadow:0 4px 12px rgba(0,0,0,0.3);">IM</div>
+    </div>
+    <div class="resizer"></div>
+  </div>
+
+  <!-- Windows -->
+  <div class="window" id="aboutWindow" style="width:560px;top:80px;left:80px">
+    <div class="title"><div style="display:flex;flex-direction:column"><div class="title-text">About Me</div><div style="font-size:12px;color:var(--muted)">Ibrahim Muhammad — Full-Stack Developer</div></div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content">
+      <h3 style="margin-top:0;color:#eaf3ff;font-weight:600">Hello, I’m Ibrahim.</h3>
+      <p style="color:var(--muted);line-height:1.6;">I'm a passionate full-stack developer with a love for creating beautiful, intuitive, and high-performance web applications. My journey in programming started with a fascination for how things work, which evolved into a career building software that solves real-world problems.</p>
+      <p style="color:var(--muted);line-height:1.6;">This portfolio is an example of my passion for experimental UI and my attention to detail. It's built from scratch to mimic a modern desktop operating system, showcasing both my design sense and my technical skills.</p>
+      <div style="margin-top:20px;">
+        <h4 style="color:var(--muted-light);font-weight:600;margin-bottom:12px;">Core Skills</h4>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;">
+          <span style="background:rgba(255,255,255,0.1);padding:4px 8px;border-radius:4px;">JavaScript (ES6+)</span>
+          <span style="background:rgba(255,255,255,0.1);padding:4px 8px;border-radius:4px;">React & Next.js</span>
+          <span style="background:rgba(255,255,255,0.1);padding:4px 8px;border-radius:4px;">Node.js & Express</span>
+          <span style="background:rgba(255,255,255,0.1);padding:4px 8px;border-radius:4px;">HTML5 & CSS3</span>
+          <span style="background:rgba(255,255,255,0.1);padding:4px 8px;border-radius:4px;">SQL & NoSQL Databases</span>
+          <span style="background:rgba(255,255,255,0.1);padding:4px 8px;border-radius:4px;">UI/UX Design Principles</span>
+        </div>
+      </div>
+    </div>
+    <div class="resizer"></div>
+  </div>
+
+  <div class="window" id="projectsWindow" style="width:760px;top:120px;left:220px">
+    <div class="title"><div class="title-text">Projects</div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content" style="max-height:500px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+        <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.05);">
+          <strong style="color:var(--muted-light);">IbrahimOS Portfolio</strong>
+          <p style="margin:6px 0 12px;color:var(--muted);font-size:13px;">An interactive desktop environment portfolio built with vanilla JavaScript, showcasing complex UI interactions, animations, and state management.</p>
+          <a href="#" style="color:var(--accent);text-decoration:none;font-size:13px;font-weight:600;">View Source →</a>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.05);">
+          <strong style="color:var(--muted-light);">E-commerce Platform</strong>
+          <p style="margin:6px 0 12px;color:var(--muted);font-size:13px;">A full-stack e-commerce site featuring product catalogs, user authentication, and Stripe integration for payments. Built with the MERN stack.</p>
+          <a href="#" style="color:var(--accent);text-decoration:none;font-size:13px;font-weight:600;">Live Demo →</a>
+        </div>
+        <div style="background:rgba(255,255,255,0.03);padding:16px;border-radius:var(--radius);border:1px solid rgba(255,255,255,0.05);">
+          <strong style="color:var(--muted-light);">Data Visualization Dashboard</strong>
+          <p style="margin:6px 0 12px;color:var(--muted);font-size:13px;">A real-time dashboard for visualizing analytics data using D3.js and WebSockets, providing insightful charts and graphs.</p>
+          <a href="#" style="color:var(--accent);text-decoration:none;font-size:13px;font-weight:600;">Explore Dashboard →</a>
+        </div>
+      </div>
+    </div>
+    <div class="resizer"></div>
+  </div>
+
+  <div class="window" id="contactWindow" style="width:520px;top:160px;left:160px">
+    <div class="title"><div class="title-text">Contact</div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content" style="font-size:14px;line-height:2;">
+      <p style="margin-top:0;color:var(--muted)">I'm always open to discussing new projects or opportunities. Feel free to reach out!</p>
+      <div style="margin-top:16px;">
+        <p><strong>Email:</strong> <a href="mailto:ibrahim@example.com" style="color:var(--accent);text-decoration:none">ibrahim@example.com</a></p>
+        <p><strong>GitHub:</strong> <a href="https://github.com/example" target="_blank" style="color:var(--accent);text-decoration:none">github.com/example</a></p>
+        <p><strong>LinkedIn:</strong> <a href="https://linkedin.com/in/example" target="_blank" style="color:var(--accent);text-decoration:none">linkedin.com/in/example</a></p>
+      </div>
+    </div>
+    <div class="resizer"></div>
+  </div>
+
+  <div class="window" id="notesWindow" style="width:420px;top:180px;left:400px">
+    <div class="title"><div class="title-text">Notes</div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content"><textarea id="notesArea" style="width:100%;height:240px;background:transparent;border:1px dashed rgba(255,255,255,0.03);color:var(--muted);padding:8px;border-radius:8px" placeholder="Write quick notes..."></textarea></div>
+    <div class="resizer"></div>
+  </div>
+
+  <div class="window" id="termWindow" style="width:560px;top:220px;left:120px">
+    <div class="title"><div class="title-text">Terminal</div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content terminal" style="max-height:400px;"><div id="termOut">Welcome to IbrahimOS terminal. Type <code>help</code> and press Enter.</div><div style="display:flex;gap:8px;margin-top:8px;"><span style="color:#00bcf2">❯</span><input id="termIn" style="flex:1;background:transparent;border:0;color:#dff7ff;outline:none;font-family:inherit;font-size:inherit;"></div></div>
+    <div class="resizer"></div>
+  </div>
+
+  <div class="window" id="musicWindow" style="width:420px;top:260px;left:560px">
+    <div class="title"><div class="title-text">Music Player</div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content"><div class="player"><button id="playTune" style="padding:10px 20px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:500;font-size:14px;box-shadow:0 2px 8px rgba(0,120,212,0.3)">Play Tune</button><div style="color:var(--muted);margin-top:8px;font-size:13px">Synth-based short loop</div></div></div>
+    <div class="resizer"></div>
+  </div>
+
+  <div class="window" id="teaserWindow" style="width:480px;top:140px;left:300px">
+    <div class="title"><div class="title-text">Brain Teaser Challenge</div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content" style="text-align:center;">
+      <h4 style="margin-top:0;color:var(--muted-light);font-weight:600">What is the value of:</h4>
+      <div id="teaserQuestion" style="font-family:'Cascadia Code',monospace;font-size:20px;color:var(--accent);background:rgba(0,0,0,0.3);padding:20px;border-radius:8px;margin:16px 0;min-height:30px;"></div>
+      <div style="display:flex;gap:12px;align-items:center;justify-content:center;margin-top:20px;">
+        <input type="text" id="teaserAnswer" placeholder="Your answer" style="padding:10px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--muted-light);width:120px;text-align:center;font-size:16px;">
+        <button id="teaserSubmit" style="padding:10px 20px;border-radius:6px;border:0;background:var(--accent);color:#fff;cursor:pointer;font-weight:500;font-size:14px;">Submit</button>
+      </div>
+      <div id="teaserFeedback" style="margin-top:16px;min-height:20px;font-weight:600;"></div>
+      <div style="margin-top:12px;font-size:13px;color:var(--muted);">Score: <span id="teaserScore">0</span></div>
+    </div>
+    <div class="resizer"></div>
+  </div>
+
+  <div class="window" id="settingsWindow" style="width:680px;top:100px;left:200px">
+    <div class="title"><div class="title-text">Settings</div><div class="controls"><div class="btn" data-action="min" title="Minimize">−</div><div class="btn snapToggle" title="Snap layouts">☐</div><div class="btn" data-action="max" title="Maximize">□</div><div class="btn" data-action="close" title="Close">✕</div></div></div>
+    <div class="content">
+      <h3 style="margin-top:0;color:var(--muted-light);font-weight:600;margin-bottom:20px">Personalization</h3>
+      <div style="margin-bottom:24px">
+        <div style="font-weight:600;color:var(--muted-light);margin-bottom:12px;font-size:13px">Background</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;max-height:400px;overflow-y:auto;padding-right:8px" id="wallpaperGrid"></div>
+      </div>
+      <div style="margin-bottom:24px">
+        <div style="font-weight:600;color:var(--muted-light);margin-bottom:12px;font-size:13px">Theme</div>
+        <div style="display:flex;gap:12px">
+          <button class="theme-btn" data-theme="light" style="padding:12px 24px;border-radius:8px;border:2px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--muted-light);cursor:pointer;transition:all 0.2s ease">Light</button>
+          <button class="theme-btn active" data-theme="dark" style="padding:12px 24px;border-radius:8px;border:2px solid var(--accent);background:rgba(0,120,212,0.2);color:var(--muted-light);cursor:pointer;transition:all 0.2s ease">Dark</button>
+        </div>
+      </div>
+    </div>
+    <div class="resizer"></div>
+  </div>
+
+  <!-- Start menu -->
+  <div id="start" class="fade-in" role="dialog" aria-hidden="true">
+    <div class="header" style="display:flex;gap:12px;align-items:center;padding:8px 4px">
+      <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#0078d4,#106ebe);display:grid;place-items:center;font-weight:700;font-size:20px;color:#fff;box-shadow:0 2px 8px rgba(0,120,212,0.3)">IM</div>
+      <div class="profile"><strong id="startMenuUserName" style="display:block;font-size:15px;color:var(--muted-light)">Ibrahim Muhammad</strong><small style="color:var(--muted);font-size:12px">Full-Stack Developer</small></div>
+    </div>
+    <div id="search" style="margin-top:16px;padding:10px 16px;border-radius:999px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);transition:background-color 0.2s ease">
+      <input type="search" id="searchInput" placeholder="Type here to search" style="width:100%;background:transparent;border:0;outline:none;color:var(--muted-light);font-size:14px;font-family:inherit" autocomplete="off">
+    </div>
+    <div style="margin-top:20px;font-weight:600;color:var(--muted-light);font-size:13px;text-transform:uppercase;letter-spacing:0.5px">Pinned</div>
+    <div class="pinned"><div class="pin" data-open="aboutWindow"><div class="glyph">👤</div><small>About</small></div><div class="pin" data-open="projectsWindow"><div class="glyph">💻</div><small>Projects</small></div><div class="pin" data-open="contactWindow"><div class="glyph">📧</div><small>Contact</small></div><div class="pin" data-open="teaserWindow"><div class="glyph">🧠</div><small>Teaser</small></div><div class="pin" data-open="termWindow"><div class="glyph">❯_</div><small>Terminal</small></div><div class="pin" data-open="musicWindow"><div class="glyph">🎵</div><small>Music</small></div><div class="pin" data-open="settingsWindow"><div class="glyph">⚙️</div><small>Settings</small></div></div>
+    <div style="margin-top:20px;font-weight:600;color:var(--muted-light);font-size:13px;text-transform:uppercase;letter-spacing:0.5px">Recommended</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
+      <div style="background:rgba(255,255,255,0.05);padding:14px;border-radius:var(--radius);cursor:pointer;transition:background-color 0.2s ease,transform 0.2s ease;border:1px solid rgba(255,255,255,0.05)">
+        <strong style="font-size:14px;color:var(--muted-light);display:block;margin-bottom:4px">My GitHub Profile</strong>
+        <div style="font-size:12px;color:var(--muted)">Recently updated</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.05);padding:14px;border-radius:var(--radius);cursor:pointer;transition:background-color 0.2s ease,transform 0.2s ease;border:1px solid rgba(255,255,255,0.05)">
+        <strong style="font-size:14px;color:var(--muted-light);display:block;margin-bottom:4px">Blog Post: Modern CSS</strong>
+        <div style="font-size:12px;color:var(--muted)">Posted 2 days ago</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Widgets Panel -->
+  <div id="widgets">
+    <div style="font-weight:600;font-size:18px;color:var(--muted-light);margin-bottom:20px">Widgets</div>
+    <div class="widget">
+      <div class="widget-title">Weather</div>
+      <div style="color:var(--muted);font-size:13px">Sunny, 72°F</div>
+    </div>
+    <div class="widget">
+      <div class="widget-title">Calendar</div>
+      <div style="color:var(--muted);font-size:13px" id="widgetDate"></div>
+    </div>
+    <div class="widget">
+      <div class="widget-title">Quick Notes</div>
+      <div style="color:var(--muted);font-size:13px">Open the Notes app to get started.</div>
+    </div>
+  </div>
+
+  <!-- Notification Center -->
+  <div id="notifications">
+    <div style="font-weight:600;font-size:18px;color:var(--muted-light);margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.1)">Notifications</div>
+    <div id="notificationList"></div>
+  </div>
+
+  <!-- Context Menu -->
+  <div class="context-menu" id="contextMenu">
+    <div class="context-menu-item" data-action="open">Open</div>
+    <div class="context-menu-item" data-action="rename">Rename</div>
+    <div class="context-menu-item" data-action="properties">Properties</div>
+    <div style="height:1px;background:rgba(255,255,255,0.1);margin:4px 0"></div>
+    <div class="context-menu-item danger" data-action="delete">Delete</div>
+  </div>
+
+  <!-- Desktop Context Menu -->
+  <div class="context-menu" id="desktopContextMenu">
+    <div class="context-menu-item" data-action="view">View</div>
+    <div class="context-menu-item" data-action="sort">Sort by</div>
+    <div class="context-menu-item has-submenu" id="wallpaperMenu">
+      <span>Change Wallpaper</span>
+      <div class="context-submenu" id="wallpaperSubmenu"></div>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,0.1);margin:4px 0"></div>
+    <div class="context-menu-item" data-action="personalize">Personalize</div>
+    <div class="context-menu-item" data-action="settings">Settings</div>
+  </div>
+
+  <!-- Quick Wallpaper Switcher -->
+  <div id="wallpaperSwitcher" style="position:fixed;bottom:80px;right:20px;z-index:999;display:none">
+    <div style="background:rgba(32,32,32,0.95);backdrop-filter:blur(20px);border-radius:12px;padding:12px;box-shadow:0 8px 32px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);min-width:280px">
+      <div style="font-weight:600;font-size:14px;color:var(--muted-light);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <span>Change Wallpaper</span>
+        <button id="closeWallpaperSwitcher" style="background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:18px;width:24px;height:24px;display:grid;place-items:center;border-radius:4px;transition:background-color 0.2s ease" title="Close">✕</button>
+      </div>
+      <div id="wallpaperSwitcherGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-height:400px;overflow-y:auto;padding-right:4px"></div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.1);display:flex;gap:8px">
+        <button onclick="openWindow('settingsWindow')" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:var(--muted-light);cursor:pointer;font-size:12px;transition:all 0.2s ease">More Options</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Taskbar -->
+  <div id="taskbar">
+    <div id="startBtn" class="task-icon" title="Start" aria-label="Start Menu" style="font-size:20px;font-weight:600">⊞</div>
+    <div id="widgetsBtn" class="task-icon" title="Widgets" aria-label="Widgets" style="font-size:18px">📊</div>
+    <div class="task-icon" data-open="aboutWindow" aria-label="About">👤</div>
+    <div class="task-icon" data-open="projectsWindow" aria-label="Projects">💻</div>
+    <div class="task-icon" data-open="contactWindow" aria-label="Contact">📧</div>
+    <div class="task-icon" data-open="termWindow" aria-label="Terminal">❯_</div>
+    <div class="task-icon" data-open="teaserWindow" aria-label="Brain Teaser">🧠</div>
+    <div class="task-icon" data-open="settingsWindow" aria-label="Settings">⚙️</div>
+    <div id="taskbar-right">
+      <div class="tray-icon" title="Network" style="font-size:16px">📶</div>
+      <div class="tray-icon" title="Volume" style="font-size:16px">🔊</div>
+      <div id="notificationsBtn" class="tray-icon" title="Notifications" style="font-size:16px;position:relative">
+        🔔
+        <span id="notificationBadge" style="position:absolute;top:2px;right:2px;width:8px;height:8px;background:#e81123;border-radius:50%;display:none"></span>
+      </div>
+      <div id="clock" title="Click for calendar"></div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- DOM Element Selections ---------- */
+    const contextMenu = document.getElementById('contextMenu');
+    const desktopContextMenu = document.getElementById('desktopContextMenu');
+    const wallpaperSubmenu = document.getElementById('wallpaperSubmenu');
+    const $ = s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+
+    /* ---------- Wallpaper Management ---------- */
+    const wallpapers = [
+      {name:'Windows 11 Default',url:'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1920&q=80'},
+      {name:'Mountain Landscape',url:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80'},
+      {name:'Ocean Sunset',url:'https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1920&q=80'},
+      {name:'Forest Path',url:'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80'},
+      {name:'City Lights',url:'https://images.unsplash.com/photo-1514565131-fce0801e5785?w=1920&q=80'},
+      {name:'Abstract Blue',url:'https://images.unsplash.com/photo-1557672172-298e090bd0f1?w=1920&q=80'},
+      {name:'Desert Dunes',url:'https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1920&q=80'},
+      {name:'Aurora',url:'https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=1920&q=80'}
+    ];
+    const wallpaperEl = document.getElementById('wallpaper');
+    let currentWallpaper = localStorage.getItem('wallpaper') || 0;
+    function setWallpaper(index){
+      const wp = wallpapers[index];
+      wallpaperEl.style.backgroundImage = `url(${wp.url})`;
+      localStorage.setItem('wallpaper',index);
+      currentWallpaper = index;
+      // Update all wallpaper selectors
+      updateWallpaperSelectors();
+    }
+    
+    function updateWallpaperSelectors(){
+      // Update settings grid
+      document.querySelectorAll('#wallpaperGrid > div').forEach((d,idx)=>{
+        d.style.borderColor = idx==currentWallpaper ? 'var(--accent)' : 'transparent';
+      });
+      // Update quick switcher grid
+      document.querySelectorAll('#wallpaperSwitcherGrid > div').forEach((d,idx)=>{
+        d.style.borderColor = idx==currentWallpaper ? 'var(--accent)' : 'transparent';
+      });
+      // Update submenu
+      populateWallpaperSubmenu();
+    }
+    
+    setWallpaper(currentWallpaper);
+    
+    // Create wallpaper grid in settings
+    const wallpaperGrid = document.getElementById('wallpaperGrid');
+    const wallpaperSwitcherGrid = document.getElementById('wallpaperSwitcherGrid');
+    
+    function createWallpaperThumbnail(wp,i,container){
+      const div = document.createElement('div');
+      div.style.cssText = 'aspect-ratio:16/9;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all 0.2s ease;position:relative';
+      div.style.backgroundImage = `url(${wp.url})`;
+      div.style.backgroundSize = 'cover';
+      div.style.backgroundPosition = 'center';
+      if(i==currentWallpaper) div.style.borderColor = 'var(--accent)';
+      div.addEventListener('click',()=>{
+        setWallpaper(i);
+        playClick();
+      });
+      div.addEventListener('mouseenter',()=>{
+        if(i!=currentWallpaper) div.style.borderColor = 'rgba(255,255,255,0.3)';
+        div.style.transform = 'scale(1.02)';
+      });
+      div.addEventListener('mouseleave',()=>{
+        if(i!=currentWallpaper) div.style.borderColor = 'transparent';
+        div.style.transform = 'scale(1)';
+      });
+      container.appendChild(div);
+    }
+    
+    function renderWallpapers(){
+      wallpaperGrid.innerHTML = '';
+      wallpapers.forEach((wp,i)=>{
+        createWallpaperThumbnail(wp,i,wallpaperGrid);
+      });
+    }
+    
+    function renderQuickSwitcher(){
+      wallpaperSwitcherGrid.innerHTML = '';
+      wallpapers.forEach((wp,i)=>{
+        createWallpaperThumbnail(wp,i,wallpaperSwitcherGrid);
+      });
+    }
+    
+    renderWallpapers();
+    renderQuickSwitcher();
+    
+    // Quick wallpaper switcher
+    const wallpaperSwitcher = document.getElementById('wallpaperSwitcher');
+    const closeWallpaperSwitcher = document.getElementById('closeWallpaperSwitcher');
+    
+    closeWallpaperSwitcher.addEventListener('click',()=>{
+      wallpaperSwitcher.style.display = 'none';
+    });
+    
+    // Keyboard shortcut: Ctrl+W to open wallpaper switcher
+    document.addEventListener('keydown',(e)=>{
+      if((e.ctrlKey || e.metaKey) && e.key==='w'){
+        e.preventDefault();
+        wallpaperSwitcher.style.display = wallpaperSwitcher.style.display==='none' ? 'block' : 'none';
+        if(wallpaperSwitcher.style.display==='block'){
+          renderQuickSwitcher();
+        }
+      }
+    });
+    
+    // Re-render when settings window opens
+    document.getElementById('settingsWindow').addEventListener('mousedown',()=>{
+      renderWallpapers();
+    });
+
+    /* ---------- Login Screen ---------- */
+    const loginScreen = document.getElementById('loginScreen');
+    const loginInput = document.getElementById('loginInput');
+    const loginBtn = document.getElementById('loginBtn');
+    const userNameDisplay = document.getElementById('userNameDisplay');
+    let userName = localStorage.getItem('userName') || '';
+    
+    function showLoginScreen(){
+      loginScreen.classList.remove('hidden');
+      loginScreen.style.display = 'flex';
+      setTimeout(()=>{
+        loginInput.focus();
+      },100);
+    }
+    
+    // Setup Enter key handler for login input
+    loginInput.addEventListener('keypress',(e)=>{
+      if(e.key==='Enter'){
+        loginBtn.click();
+      }
+    });
+    
+    loginBtn.addEventListener('click',()=>{
+      const name = loginInput.value.trim();
+      if(name.length>0){
+        // Validate: allow any characters, any length (but at least 1 char)
+        userName = name;
+        localStorage.setItem('userName',userName);
+        loginScreen.classList.add('hidden');
+        loginScreen.style.display = 'none';
+        lockScreen.classList.remove('hidden');
+        lockScreen.style.display = 'flex';
+        userNameDisplay.textContent = userName;
+        const startMenuUserName = document.getElementById('startMenuUserName');
+        if(startMenuUserName) startMenuUserName.textContent = userName;
+        playClick();
+      } else {
+        loginInput.style.borderColor = '#e81123';
+        setTimeout(()=>{
+          loginInput.style.borderColor = 'rgba(255,255,255,0.1)';
+        },1000);
+      }
+    });
+    
+    // Update start menu name if user is already logged in (only after page loads)
+    window.addEventListener('load',()=>{
+      if(userName){
+        const startMenuUserName = document.getElementById('startMenuUserName');
+        if(startMenuUserName) startMenuUserName.textContent = userName;
+      }
+    });
+    
+    /* ---------- Boot screen with synthetic progress & startup sound ---------- */
+    const boot = document.getElementById('bootScreen'); 
+    const bootBar = document.getElementById('bootBar');
+    const lockScreen = document.getElementById('lockScreen');
+    
+    // Verify elements exist
+    if(!boot || !bootBar || !lockScreen || !loginScreen){
+      console.error('Critical elements not found!', {boot, bootBar, lockScreen, loginScreen});
+    }
+    
+    function startupSequence(){ 
+      if(!boot || !bootBar) {
+        console.error('Boot elements not available');
+        return;
+      }
+      
+      // Reset progress bar
+      bootBar.style.width = '0%';
+      
+      let p=0; 
+      const t=setInterval(()=>{ 
+        p += 7 + Math.random()*8; 
+        if(bootBar) bootBar.style.width = Math.min(100,p)+'%'; 
+        if(p>98){ 
+          clearInterval(t); 
+          setTimeout(()=>{ 
+            if(boot) {
+              boot.classList.add('hidden');
+              boot.style.display = 'none';
+            }
+            if(userName && lockScreen){
+              lockScreen.classList.remove('hidden');
+              lockScreen.style.display = 'flex';
+              if(userNameDisplay) userNameDisplay.textContent = userName;
+            } else {
+              openPuzzleWindow(); // Show puzzle for new users
+            }
+            try {
+              playStartupSound();
+            } catch(e) {
+              console.log('Sound playback failed:', e);
+            }
+          },400) 
+        } 
+      },160) 
+    }
+
+    // startup sound via WebAudio
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    let audioCtx; // Don't initialize it yet
+    function playStartupSound(){
+      if (!audioCtx) audioCtx = new AudioCtx();
+      const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(220,audioCtx.currentTime); o.frequency.linearRampToValueAtTime(880,audioCtx.currentTime+0.25); g.gain.setValueAtTime(0, audioCtx.currentTime); g.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+1.2); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+1.3);
+    }
+
+    /* ---------- Lock screen ---------- */
+    const unlockBtn = document.getElementById('unlockBtn');
+    unlockBtn.addEventListener('click', ()=>{ 
+      lockScreen.classList.add('hidden');
+      lockScreen.style.display = 'none';
+      document.getElementById('desktop').style.filter='none';
+      playClick();
+    });
+
+    /* show boot on load */
+    window.addEventListener('load', ()=>{
+      console.log('Window fully loaded. Starting up.');
+
+      // Ensure initial state - boot screen visible, others hidden
+      if (boot) {
+        boot.style.display = 'flex';
+        boot.classList.remove('hidden');
+      }
+      if (loginScreen) {
+        loginScreen.style.display = 'none';
+        loginScreen.classList.add('hidden');
+      }
+      if (lockScreen) {
+        lockScreen.style.display = 'none';
+        lockScreen.classList.add('hidden');
+      }
+
+      // Start the boot animation
+      if (boot && bootBar) {
+        startupSequence();
+      } else {
+        // Fallback if boot elements are missing
+        console.error('Boot elements not found, skipping animation.');
+        if (boot) boot.style.display = 'none';
+        if (userName && lockScreen) {
+          lockScreen.style.display = 'flex';
+          lockScreen.classList.remove('hidden');
+          if (userNameDisplay) userNameDisplay.textContent = userName;
+        } else {
+          openPuzzleWindow(); // Show puzzle for new users
+        }
+      }
+    });
+
+    /* ---------- UI interactions: open windows, start menu ---------- */
+    // Double-click handler is now in drag-and-drop section to avoid conflicts
+    $$('.icon').forEach(ic=>{ ic.addEventListener('keydown', e=>{ if(e.key==='Enter') openWindow(ic.dataset.target) }) })
+    const startBtn = document.getElementById('startBtn'), start = document.getElementById('start'); startBtn.addEventListener('click', e=>{ e.stopPropagation(); start.style.display = start.style.display==='block' ? 'none' : 'block'; start.setAttribute('aria-hidden', start.style.display==='block' ? 'false' : 'true') })
+    document.addEventListener('click', e=>{ if(!start.contains(e.target) && e.target !== startBtn) start.style.display='none' })
+    $$('[data-open]').forEach(el=>el.addEventListener('click', ()=>openWindow(el.dataset.open)))
+
+    // Window opening animation
+    function showWindowOpeningAnimation(icon){
+      const overlay = document.createElement('div');
+      overlay.className = 'window-opening';
+      const iconDiv = document.createElement('div');
+      iconDiv.className = 'window-opening-icon';
+      iconDiv.textContent = icon;
+      overlay.appendChild(iconDiv);
+      document.body.appendChild(overlay);
+      
+      setTimeout(()=>{
+        overlay.remove();
+      },500);
+    }
+
+    // central open function accepts id without 'Window' suffix
+    function openWindow(idNoSuffix){ 
+      const id = idNoSuffix.endsWith('Window')? idNoSuffix : idNoSuffix+'Window'; 
+      const win = document.getElementById(id); 
+      if(!win) return;
+      
+      // Find icon for animation
+      const iconEl = document.querySelector(`[data-target="${id}"]`);
+      const icon = iconEl ? iconEl.dataset.icon || iconEl.querySelector('.glyph').textContent : '📂';
+      
+      // Show opening animation
+      showWindowOpeningAnimation(icon);
+      
+      setTimeout(()=>{
+        win.style.display='block'; 
+        win.classList.add('fade-in'); 
+        win.style.zIndex = ++openWindow.z || 100; 
+        centerIfFirstOpen(win); 
+        playClick(); 
+        setActiveIcon(idNoSuffix);
+      },250);
+    }
+    function closeWindow(win){ win.style.display='none'; const id = win.id.replace('Window',''); const icon = $$(`[data-open="${id}"]`); icon.forEach(ic=>ic.classList.remove('active')); }
+    function setActiveIcon(id){ $$('.task-icon.active').forEach(i=>i.classList.remove('active')); const icon = $$(`[data-open="${id}"]`); icon.forEach(ic=>ic.classList.add('active')); }
+
+    function playClick(){
+      if (!audioCtx) audioCtx = new AudioCtx();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      try{ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='triangle'; o.frequency.setValueAtTime(880,audioCtx.currentTime); g.gain.setValueAtTime(0.0001,audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.05,audioCtx.currentTime+0.01); g.gain.exponentialRampToValueAtTime(0.0001,audioCtx.currentTime+0.12); o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+0.14); }catch(e){}
+    }
+
+    // center window if first time
+    function centerIfFirstOpen(win){ if(win.dataset.centered) return; const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0); const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0); const w = win.offsetWidth, h = win.offsetHeight; win.style.left = ((vw - w)/2) + 'px'; win.style.top = Math.max(80, (vh - h)/2 - 40) + 'px'; win.dataset.centered='1' }
+
+    /* ---------- window controls, dragging, resizing, snapping ---------- */
+    $$(' .window').forEach(win=>{
+      const controls = win.querySelectorAll('.btn'); controls.forEach(c=>c.addEventListener('click', e=>{ e.stopPropagation(); const a = c.dataset.action; if(a==='close') closeWindow(win); if(a==='min') closeWindow(win); if(a==='max'){ if(!win.dataset.maxed){ win.dataset.old = JSON.stringify({left:win.style.left,top:win.style.top,width:win.style.width,height:win.style.height}); win.style.left='40px'; win.style.top='60px'; win.style.width='calc(100% - 160px)'; win.style.height='calc(100% - 200px)'; win.dataset.maxed='1'; } else { const old = JSON.parse(win.dataset.old||'{}'); win.style.left=old.left;win.style.top=old.top;win.style.width=old.width;win.style.height=old.height; delete win.dataset.maxed } } }))
+
+      // snapToggle shows small menu
+      const snap = win.querySelector('.snapToggle'); if(snap){ snap.addEventListener('click', e=>{ e.stopPropagation(); showSnapMenu(win, snap) }) }
+
+      // bring to front
+      win.addEventListener('mousedown', ()=> win.style.zIndex = ++openWindow.z || 100);
+
+      // draggable
+      const bar = win.querySelector('.title'); let dragging=false, offX=0, offY=0; bar.addEventListener('mousedown', e=>{ dragging=true; bar.style.cursor='grabbing'; offX = win.offsetLeft - e.clientX; offY = win.offsetTop - e.clientY; }); document.addEventListener('mouseup', ()=>{ dragging=false; bar.style.cursor='grab' }); document.addEventListener('mousemove', e=>{ if(dragging){ win.style.left = e.clientX + offX + 'px'; win.style.top = e.clientY + offY + 'px' } });
+
+      // resizer
+      const res = win.querySelector('.resizer'); if(res){ let rdown=false, sx=0, sy=0, sw=0, sh=0; res.addEventListener('mousedown', e=>{ e.stopPropagation(); rdown=true; sx=e.clientX; sy=e.clientY; sw=win.offsetWidth; sh=win.offsetHeight; }); document.addEventListener('mouseup', ()=>{ rdown=false }); document.addEventListener('mousemove', e=>{ if(rdown){ const dx=e.clientX - sx; const dy=e.clientY - sy; win.style.width = Math.max(240, sw + dx) + 'px'; win.style.height = Math.max(120, sh + dy) + 'px'; } }) }
+
+    });
+
+    // snap menu implementation
+    function showSnapMenu(win, anchor){ // simple 3 options: left / right / grid
+      let menu = document.createElement('div'); menu.className='snapMenu'; menu.innerHTML = '<div class="snapBtn" data-snap="left">◧</div><div class="snapBtn" data-snap="right">◩</div><div class="snapBtn" data-snap="center">▣</div>';
+      document.body.appendChild(menu); const rect = anchor.getBoundingClientRect(); menu.style.top = (rect.bottom + 8) + 'px'; menu.style.left = (rect.right - 150) + 'px'; menu.addEventListener('click', e=>{ const s = e.target.closest('.snapBtn')?.dataset.snap; if(s){ applySnap(win,s); menu.remove(); } }); document.addEventListener('click', ()=> menu.remove(), {once:true}) }
+    function applySnap(win, type){ const vw=window.innerWidth, vh=window.innerHeight; if(type==='left'){ win.style.left='20px'; win.style.top='80px'; win.style.width=(vw/2 - 60)+'px'; win.style.height=(vh - 220)+'px'; } if(type==='right'){ win.style.left=(vw/2 + 20)+'px'; win.style.top='80px'; win.style.width=(vw/2 - 60)+'px'; win.style.height=(vh - 220)+'px'; } if(type==='center'){ win.style.left=(vw*0.12)+'px'; win.style.top='80px'; win.style.width=(vw*0.76)+'px'; win.style.height=(vh - 200)+'px'; } }
+
+    /* ---------- start menu search & pins ---------- */
+    document.getElementById('searchInput').addEventListener('input', e=>{ const q = e.target.value.toLowerCase().trim(); $$('.pin').forEach(p=>{ const t=(p.textContent||'').toLowerCase(); p.style.opacity = t.includes(q) ? '1' : (q?0.25:1) }) })
+    $$('.pin').forEach(p=>p.addEventListener('click', ()=>{ openWindow(p.dataset.open); start.style.display='none' }))
+
+    /* ---------- terminal (fake) ---------- */
+    const termOut = document.getElementById('termOut'), termIn = document.getElementById('termIn'); termIn.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const v = termIn.value.trim(); if(!v) return; if(v==='help'){ termOut.innerHTML += '<div style="margin-top:8px">commands: help, about, clear</div>' } else if(v==='about'){ termOut.innerHTML += '<div style="margin-top:8px">Ibrahim — developer & author</div>' } else if(v==='clear'){ termOut.innerHTML = '' } else { termOut.innerHTML += '<div style="margin-top:8px">Unknown command: '+v+'</div>' } termIn.value=''; termOut.scrollTop = termOut.scrollHeight } })
+
+    const termCommands = {
+      help: 'Available commands: <br> `about` - Display information about me. <br> `projects` - List my main projects. <br> `contact` - Show my contact information. <br> `skills` - List my technical skills. <br> `clear` - Clear the terminal screen.',
+      about: 'Ibrahim Muhammad. A full-stack developer passionate about creating intuitive and performant web experiences. This portfolio is a testament to my love for creative coding.',
+      projects: '1. IbrahimOS Portfolio (this project) <br> 2. Full-Stack E-commerce Platform <br> 3. Real-time Data Visualization Dashboard',
+      contact: 'You can reach me via: <br> - Email: ibrahim@example.com <br> - GitHub: github.com/example',
+      skills: 'JavaScript, React, Next.js, Node.js, Express, SQL, MongoDB, CSS3, HTML5, UI/UX Design.',
+      clear: ''
+    };
+
+    termIn.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const v = termIn.value.trim().toLowerCase(); if(!v) return; termOut.innerHTML += `<div style="margin-top:8px;color:#00bcf2">❯ ${v}</div>`; if(v==='clear'){ termOut.innerHTML = '' } else if(termCommands[v]){ termOut.innerHTML += `<div style="margin-top:4px;padding-left:12px;">${termCommands[v]}</div>` } else { termOut.innerHTML += `<div style="margin-top:4px;color:#ff8c8c;">Unknown command: '${v}'. Type 'help' for a list of commands.</div>` } termIn.value=''; termOut.scrollTop = termOut.scrollHeight } })
+
+    /* ---------- music synth ---------- */
+    const playTune = document.getElementById('playTune'); let musicOn=false, synthNodes=[];
+    playTune.addEventListener('click', ()=>{ if(!musicOn){ playMelody(); playTune.textContent='Stop'; } else { stopMelody(); playTune.textContent='Play Tune' } musicOn = !musicOn });
+    function playMelody(){ const notes=[440,660,880,660,440]; let t=audioCtx.currentTime; notes.forEach((n,i)=>{ const o = audioCtx.createOscillator(); const g = audioCtx.createGain(); o.type='sine'; o.frequency.setValueAtTime(n,t + i*0.32); g.gain.setValueAtTime(0.0001,t + i*0.32); g.gain.exponentialRampToValueAtTime(0.12,t + i*0.32 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001,t + i*0.32 + 0.28); o.connect(g); g.connect(audioCtx.destination); o.start(t + i*0.32); o.stop(t + i*0.32 + 0.3); synthNodes.push(o); }); }
+    function stopMelody(){ synthNodes.forEach(n=>{ try{ n.stop() }catch(e){} }); synthNodes=[] }
+
+    /* ---------- accessibility & keyboard ---------- */
+    document.addEventListener('keydown', e=>{ if(e.key==='Meta'){ startBtn.click() } if(e.key==='Escape'){ // close all windows
+        $$(' .window').forEach(w=>closeWindow(w)) } });
+
+    /* ---------- Drag and Drop for Desktop Icons ---------- */
+    let draggedIcon = null;
+    let dragOffset = {x:0, y:0};
+    
+    $$('.icon').forEach(icon=>{
+      // Save initial position
+      const savedPos = localStorage.getItem(`icon-${icon.dataset.target}`);
+      if(savedPos){
+        const pos = JSON.parse(savedPos);
+        icon.style.left = pos.x + 'px';
+        icon.style.top = pos.y + 'px';
+      }
+      
+      icon.addEventListener('mousedown',(e)=>{
+        if(e.button !== 0) return; // Only left mouse button
+        draggedIcon = icon;
+        const rect = icon.getBoundingClientRect();
+        dragOffset.x = e.clientX - rect.left;
+        dragOffset.y = e.clientY - rect.top;
+        icon.classList.add('dragging');
+        icon.style.zIndex = '10000';
+        e.preventDefault();
+      });
+      
+      // Double-click to open (with small delay to distinguish from drag)
+      let clickTimer = null;
+      icon.addEventListener('click',(e)=>{
+        if(e.detail === 2){
+          clearTimeout(clickTimer);
+          e.stopPropagation();
+          openWindow(icon.dataset.target);
+        } else {
+          clickTimer = setTimeout(()=>{
+            // Single click - do nothing or select icon
+          },300);
+        }
+      });
+    });
+    
+    document.addEventListener('mousemove',(e)=>{
+      if(draggedIcon){
+        const desktop = document.getElementById('desktop');
+        const desktopRect = desktop.getBoundingClientRect();
+        let x = e.clientX - desktopRect.left - dragOffset.x;
+        let y = e.clientY - desktopRect.top - dragOffset.y;
+        
+        // Constrain to desktop bounds
+        x = Math.max(0, Math.min(x, desktopRect.width - draggedIcon.offsetWidth));
+        y = Math.max(0, Math.min(y, desktopRect.height - draggedIcon.offsetHeight));
+        
+        draggedIcon.style.left = x + 'px';
+        draggedIcon.style.top = y + 'px';
+      }
+    });
+    
+    document.addEventListener('mouseup',()=>{
+      if(draggedIcon){
+        // Save position
+        const x = parseInt(draggedIcon.style.left) || 20;
+        const y = parseInt(draggedIcon.style.top) || 20;
+        localStorage.setItem(`icon-${draggedIcon.dataset.target}`,JSON.stringify({x,y}));
+        
+        draggedIcon.classList.remove('dragging');
+        draggedIcon.style.zIndex = '1';
+        draggedIcon = null;
+        playClick();
+      }
+    });
+    
+    // Prevent default drag behavior
+    document.addEventListener('dragstart',(e)=>{
+      if(e.target.closest('.icon')){
+        e.preventDefault();
+      }
+    });
+
+    /* small helper: show desktop icons on load */
+    window.addEventListener('load', ()=>{ 
+      $$('.icon').forEach((ic,i)=> setTimeout(()=> ic.classList.add('fade-in'), 80*i));
+      
+      // Restore icon positions
+      $$('.icon').forEach(icon=>{
+        const savedPos = localStorage.getItem(`icon-${icon.dataset.target}`);
+        if(savedPos){
+          const pos = JSON.parse(savedPos);
+          icon.style.left = pos.x + 'px';
+          icon.style.top = pos.y + 'px';
+        }
+      });
+    })
+
+    /* ---------- Widgets Panel ---------- */
+    const widgetsPanel = document.getElementById('widgets');
+    const widgetsBtn = document.getElementById('widgetsBtn');
+    widgetsBtn.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      widgetsPanel.classList.toggle('open');
+      if(widgetsPanel.classList.contains('open')){
+        notificationsPanel.classList.remove('open');
+      }
+    });
+    document.addEventListener('click',(e)=>{
+      if(!widgetsPanel.contains(e.target) && e.target !== widgetsBtn){
+        widgetsPanel.classList.remove('open');
+      }
+    });
+
+    /* ---------- Notification Center ---------- */
+    const notificationsPanel = document.getElementById('notifications');
+    const notificationsBtn = document.getElementById('notificationsBtn');
+    const notificationList = document.getElementById('notificationList');
+    const notificationBadge = document.getElementById('notificationBadge');
+    let notifications = JSON.parse(localStorage.getItem('notifications')||'[]');
+    
+    function addNotification(title,text,autoDismiss=true){
+      const notif = {id:Date.now(),title,text,time:new Date()};
+      notifications.unshift(notif);
+      if(notifications.length>10) notifications = notifications.slice(0,10);
+      localStorage.setItem('notifications',JSON.stringify(notifications));
+      updateNotifications();
+      notificationBadge.style.display = 'block';
+      playClick();
+      
+      // Auto-dismiss after 5 seconds if enabled
+      if(autoDismiss){
+        setTimeout(()=>{
+          notifications = notifications.filter(n=>n.id!==notif.id);
+          localStorage.setItem('notifications',JSON.stringify(notifications));
+          updateNotifications();
+        },5000);
+      }
+    }
+    
+    function updateNotifications(){
+      notificationList.innerHTML = '';
+      if(notifications.length===0){
+        notificationList.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px 20px;font-size:13px">No notifications</div>';
+        notificationBadge.style.display = 'none';
+        return;
+      }
+      notifications.forEach(n=>{
+        const div = document.createElement('div');
+        div.className = 'notification';
+        div.innerHTML = `
+          <div class="notification-title">${n.title}</div>
+          <div class="notification-text">${n.text}</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:8px">${new Date(n.time).toLocaleTimeString()}</div>
+        `;
+        notificationList.appendChild(div);
+      });
+    }
+    
+    notificationsBtn.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      notificationsPanel.classList.toggle('open');
+      if(notificationsPanel.classList.contains('open')){
+        widgetsPanel.classList.remove('open');
+        notificationBadge.style.display = 'none';
+      }
+    });
+    document.addEventListener('click',(e)=>{
+      if(!notificationsPanel.contains(e.target) && e.target !== notificationsBtn && !notificationsBtn.contains(e.target)){
+        notificationsPanel.classList.remove('open');
+      }
+    });
+    
+    // Add welcome notification
+    setTimeout(()=>{
+      if(notifications.length===0){
+        addNotification('Welcome to IbrahimOS','Your portfolio is ready! Click the widgets button to explore more features.',false);
+      } else {
+        updateNotifications();
+      }
+    },2000);
+    
+    // Demo notifications
+    setTimeout(()=>{
+      addNotification('System Update','Windows 11 update is available. Restart to install.');
+    },8000);
+
+    /* ---------- Clock ---------- */
+    const clockEl = document.getElementById('clock');
+    function updateClock(){
+      const now = new Date();
+      const time = now.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+      clockEl.textContent = time;
+    }
+    updateClock();
+    setInterval(updateClock,1000);
+    
+    // Widget date
+    const widgetDate = document.getElementById('widgetDate');
+    function updateWidgetDate(){
+      const now = new Date();
+      const options = {weekday:'long',year:'numeric',month:'long',day:'numeric'};
+      widgetDate.textContent = now.toLocaleDateString('en-US',options);
+    }
+    updateWidgetDate();
+
+    /* ---------- Context Menu ---------- */
+    let contextTarget = null;
+    
+    // Populate wallpaper submenu
+    function populateWallpaperSubmenu(){
+      wallpaperSubmenu.innerHTML = '';
+      wallpapers.forEach((wp,i)=>{
+        const item = document.createElement('div');
+        item.className = 'context-menu-item';
+        item.innerHTML = `
+          <div class="wallpaper-preview" style="background-image:url(${wp.url})"></div>
+          <span>${wp.name}</span>
+          ${i==currentWallpaper ? '<span style="margin-left:auto;color:var(--accent)">✓</span>' : ''}
+        `;
+        item.addEventListener('click',(e)=>{
+          e.stopPropagation();
+          setWallpaper(i);
+          desktopContextMenu.style.display = 'none';
+          playClick();
+        });
+        wallpaperSubmenu.appendChild(item);
+      });
+    }
+    populateWallpaperSubmenu();
+    
+    // Icon context menu
+    document.addEventListener('contextmenu',(e)=>{
+      if(e.target.closest('.icon')){
+        e.preventDefault();
+        contextTarget = e.target.closest('.icon');
+        contextMenu.style.display = 'block';
+        desktopContextMenu.style.display = 'none';
+        contextMenu.style.left = e.clientX + 'px';
+        contextMenu.style.top = e.clientY + 'px';
+      } else if(e.target.closest('#desktop') && !e.target.closest('.icon') && !e.target.closest('.window')){
+        e.preventDefault();
+        contextTarget = null;
+        contextMenu.style.display = 'none';
+        desktopContextMenu.style.display = 'block';
+        desktopContextMenu.style.left = e.clientX + 'px';
+        desktopContextMenu.style.top = e.clientY + 'px';
+        populateWallpaperSubmenu();
+      } else {
+        contextMenu.style.display = 'none';
+        desktopContextMenu.style.display = 'none';
+      }
+    });
+    
+    document.addEventListener('click',(e)=>{
+      if(!contextMenu.contains(e.target) && !desktopContextMenu.contains(e.target)){
+        contextMenu.style.display = 'none';
+        desktopContextMenu.style.display = 'none';
+        wallpaperSubmenu.classList.remove('show');
+      }
+    });
+    
+    // Wallpaper menu hover
+    const wallpaperMenu = document.getElementById('wallpaperMenu');
+    wallpaperMenu.addEventListener('mouseenter',()=>{
+      wallpaperSubmenu.classList.add('show');
+    });
+    desktopContextMenu.addEventListener('mouseleave',()=>{
+      setTimeout(()=>{
+        if(!desktopContextMenu.matches(':hover')){
+          wallpaperSubmenu.classList.remove('show');
+        }
+      },200);
+    });
+    
+    contextMenu.addEventListener('click',(e)=>{
+      const action = e.target.dataset.action;
+      if(!action) return;
+      if(action==='open' && contextTarget){
+        openWindow(contextTarget.dataset.target);
+      } else if(action==='delete'){
+        if(confirm('Delete this shortcut?')){
+          contextTarget.style.opacity = '0.3';
+          setTimeout(()=>contextTarget.style.display='none',300);
+        }
+      }
+      contextMenu.style.display = 'none';
+    });
+    
+    // Desktop context menu actions
+    desktopContextMenu.addEventListener('click',(e)=>{
+      const action = e.target.dataset.action;
+      if(!action) return;
+      if(action==='personalize' || action==='settings'){
+        openWindow('settingsWindow');
+        desktopContextMenu.style.display = 'none';
+      } else if(action==='view'){
+        desktopContextMenu.style.display = 'none';
+      } else if(action==='sort'){
+        desktopContextMenu.style.display = 'none';
+      }
+    });
+    
+    // Show quick switcher from desktop context menu "Change Wallpaper"
+    document.getElementById('wallpaperMenu').addEventListener('click',(e)=>{
+      if(!e.target.closest('.context-submenu')){
+        wallpaperSwitcher.style.display = 'block';
+        renderQuickSwitcher();
+        desktopContextMenu.style.display = 'none';
+      }
+    });
+
+    /* ---------- Settings Theme ---------- */
+    document.querySelectorAll('.theme-btn').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        const theme = btn.dataset.theme;
+        // Theme switching logic can be added here
+        localStorage.setItem('theme',theme);
+      });
+    });
+
+    /* ---------- Brain Teaser Game ---------- */
+    const teaserQuestionEl = document.getElementById('teaserQuestion');
+    const teaserAnswerEl = document.getElementById('teaserAnswer');
+    const teaserSubmitBtn = document.getElementById('teaserSubmit');
+    const teaserFeedbackEl = document.getElementById('teaserFeedback');
+    const teaserScoreEl = document.getElementById('teaserScore');
+    let teaserScore = 0;
+
+    function generateTeaser() {
+      const r = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+      const a = r(2, 20);
+      const b = r(2, 10);
+      const c = r(5, 50);
+
+      const teasers = [
+        `(${a} * ${b}) / (${a} * ${b})`,
+        `${c}⁰`,
+        `sin(90°)`,
+        `cos(0°)`,
+        `tan(45°)`,
+        `log₁₀(10)`,
+        `(${a} + ${b}) - (${a} + ${b} - 1)`,
+        `(${c} / ${c}) * (${b} / ${b})`,
+        `ceil(${a} / ${a + 1})`,
+        `floor(${b+1} / ${b})`
+      ];
+      
+      teaserQuestionEl.textContent = teasers[r(0, teasers.length - 1)];
+      teaserAnswerEl.value = '';
+      teaserFeedbackEl.textContent = '';
+    }
+
+    function checkTeaserAnswer() {
+      if (teaserAnswerEl.value.trim() === '1') {
+        teaserScore++;
+        teaserScoreEl.textContent = teaserScore;
+        teaserFeedbackEl.textContent = 'Correct!';
+        teaserFeedbackEl.style.color = '#4caf50';
+        playClick();
+        setTimeout(generateTeaser, 800);
+      } else {
+        teaserFeedbackEl.textContent = 'Not quite, try again!';
+        teaserFeedbackEl.style.color = '#ff8c8c';
+        teaserAnswerEl.focus();
+      }
+    }
+
+    teaserSubmitBtn.addEventListener('click', checkTeaserAnswer);
+    teaserAnswerEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkTeaserAnswer(); });
+    document.getElementById('teaserWindow').addEventListener('mousedown', generateTeaser, { once: true });
+
+    /* ---------- New User Puzzle ---------- */
+    const puzzleWindow = document.getElementById('puzzleWindow');
+    const puzzlePiece = document.getElementById('puzzlePiece');
+    const puzzleSlot = document.getElementById('puzzleSlot');
+    let isDraggingPuzzle = false;
+    let puzzleOffset = { x: 0, y: 0 };
+
+    function openPuzzleWindow() {
+      puzzleWindow.style.display = 'block';
+      centerIfFirstOpen(puzzleWindow);
+      puzzleWindow.style.zIndex = ++openWindow.z || 100;
+    }
+
+    puzzlePiece.addEventListener('mousedown', (e) => {
+      isDraggingPuzzle = true;
+      puzzlePiece.style.cursor = 'grabbing';
+      puzzlePiece.style.transition = 'none';
+      const rect = puzzlePiece.getBoundingClientRect();
+      puzzleOffset.x = e.clientX - rect.left;
+      puzzleOffset.y = e.clientY - rect.top;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isDraggingPuzzle) return;
+      puzzlePiece.style.left = (e.clientX - puzzleOffset.x) + 'px';
+      puzzlePiece.style.top = (e.clientY - puzzleOffset.y) + 'px';
+    });
+
+    document.addEventListener('mouseup', (e) => {
+      if (!isDraggingPuzzle) return;
+      isDraggingPuzzle = false;
+      puzzlePiece.style.cursor = 'grab';
+
+      const pieceRect = puzzlePiece.getBoundingClientRect();
+      const slotRect = puzzleSlot.getBoundingClientRect();
+
+      // Check if the center of the piece is inside the slot
+      const isOverSlot = (
+        pieceRect.left + pieceRect.width / 2 > slotRect.left &&
+        pieceRect.left + pieceRect.width / 2 < slotRect.right &&
+        pieceRect.top + pieceRect.height / 2 > slotRect.top &&
+        pieceRect.top + pieceRect.height / 2 < slotRect.bottom
+      );
+
+      if (isOverSlot) {
+        // Snap into place
+        puzzlePiece.style.transition = 'all 0.2s ease';
+        puzzlePiece.style.left = slotRect.left + 'px';
+        puzzlePiece.style.top = slotRect.top + 'px';
+        puzzleSlot.style.borderColor = 'var(--accent)';
+        puzzleSlot.style.background = 'rgba(0,120,212,0.2)';
+        playStartupSound(); // Success sound
+        setTimeout(() => {
+          puzzleWindow.style.display = 'none';
+          showLoginScreen();
+        }, 1000);
+      }
+    });
+  </script>
+</body>
+</html>
